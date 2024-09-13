@@ -1,25 +1,28 @@
 /*
  * SHA.h
- * 
- * This header file defines classes for implementing various SHA (Secure Hash Algorithm)
- * functions in C++. It includes:
- * 
- * - SHABase: A base class containing common methods and utilities used by SHA algorithms.
+ *
+ * This header file defines classes for implementing various SHA (Secure Hash
+ * Algorithm) functions in C++. It includes:
+ *
+ * - SHABase: A base class containing common methods and utilities used by SHA
+ * algorithms.
  * - SHA256: Implements the SHA-256 hashing function.
- * - SHA224: Implements the SHA-224 hashing function, which is a truncated version of SHA-256.
+ * - SHA224: Implements the SHA-224 hashing function, which is a truncated
+ * version of SHA-256.
  * - SHA512: Implements the SHA-512 hashing function.
- * - SHA384: Implements the SHA-384 hashing function, which is a truncated version of SHA-512.
+ * - SHA384: Implements the SHA-384 hashing function, which is a truncated
+ * version of SHA-512.
  * - SHA512_224: Implements the SHA-512/224 hashing function.
  * - SHA512_256: Implements the SHA-512/256 hashing function.
- * 
- * The file provides functionality to compute cryptographic hash values for given input data.
- * Each class supports hashing with optional initial hash values and provides methods to
- * format and convert the output into a hexadecimal string representation.
- * 
- * This file includes necessary constants, utility functions, and detailed implementations
- * of the SHA algorithms as specified by the NIST standards.
+ *
+ * The file provides functionality to compute cryptographic hash values for
+ * given input data. Each class supports hashing with optional initial hash
+ * values and provides methods to format and convert the output into a
+ * hexadecimal string representation.
+ *
+ * This file includes necessary constants, utility functions, and detailed
+ * implementations of the SHA algorithms as specified by the NIST standards.
  */
-
 
 #ifndef SHA_H_
 #define SHA_H_
@@ -31,6 +34,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
+
+namespace sha {
 
 static constexpr uint64_t CONST_SHA512_H[8] = {
     0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b,
@@ -122,7 +128,8 @@ class SHABase {
 
   // Converts a preprocessed string into a vector of integral types.
   template <typename Type>
-  std::vector<Type> to_integral_vector(const std::string& preprocessed_data) const {
+  std::vector<Type> to_integral_vector(
+      const std::string& preprocessed_data) const {
     std::vector<Type> data_in_integral(preprocessed_data.size() / sizeof(Type));
     int k = 0;
     for (int i = 0; i < data_in_integral.size(); i++) {
@@ -269,11 +276,10 @@ class SHA256 : public SHABase {
     return RotR<uint32_t>(x, 17) ^ RotR<uint32_t>(x, 19) ^ ShR<uint32_t>(x, 10);
   }
 
- public:
-  // Computes the SHA-256 hash of the input data using optional initial hash
-  // values.
-  std::string hash(const char* data,
-                   const uint32_t* init_hash = ::CONST_SHA256_H) const {
+ protected:
+  // Computes the SHA-256 hash of the input data using the given initial hash
+  // values and returns the result as a hexadecimal string.
+  std::string __hash(const char* data, const uint32_t* init_hash) const {
     uint32_t hash_vals[8];
     std::memcpy(hash_vals, init_hash, 32);
     std::string preprocessed_data = prepare_input(data);
@@ -286,14 +292,20 @@ class SHA256 : public SHABase {
     std::string hashed_value = to_string(hash_vals);
     return to_hex(hashed_value);
   }
+
+ public:
+  // Computes the SHA-256 hash of the input data using optional initial hash
+  // values.
+  std::string hash(const char* data) const {
+    return __hash(data, CONST_SHA256_H);
+  }
 };
 
-class SHA224 : public SHABase {
+class SHA224 : public SHA256 {
  public:
   // Computes a SHA-224 hash from input data.
   std::string hash(const char* data) const {
-    SHA256 sha256;
-    std::string hashed_digest = sha256.hash(data, ::CONST_SHA224_H);
+    std::string hashed_digest = __hash(data, CONST_SHA224_H);
     hashed_digest.resize(56);
     return hashed_digest;
   }
@@ -386,10 +398,10 @@ class SHA512 : public SHABase {
     return RotR<uint64_t>(x, 19) ^ RotR<uint64_t>(x, 61) ^ ShR<uint64_t>(x, 6);
   }
 
- public:
-  // Computes a SHA-512 hash from input data.
-  std::string hash(const char* data,
-                   const uint64_t* init_hash = CONST_SHA512_H) const {
+ protected:
+  // Hashes the input data using an initial hash value and returns the result as
+  // a hexadecimal string.
+  std::string __hash(const char* data, const uint64_t* init_hash) const {
     uint64_t hash_vals[8];
     std::memcpy(hash_vals, init_hash, 64);
 
@@ -404,40 +416,44 @@ class SHA512 : public SHABase {
     std::string hashed_value = to_string(hash_vals);
     return to_hex(hashed_value);
   }
+
+ public:
+  // Computes a SHA-512 hash from input data.
+  std::string hash(const char* data) const {
+    return __hash(data, CONST_SHA512_H);
+  }
 };
 
-class SHA384 : public SHABase {
+class SHA384 : public SHA512 {
  public:
   // Computes a SHA-384 hash from input data.
   std::string hash(const char* data) const {
-    SHA512 sha512;
-    std::string hash_digest = sha512.hash(data, CONST_SHA384_H);
+    std::string hash_digest = __hash(data, CONST_SHA384_H);
     hash_digest.resize(96);
     return hash_digest;
   }
 };
 
-class SHA512_224 : public SHABase {
+class SHA512_224 : public SHA512 {
  public:
   // Computes a SHA-512/224 hash from input data and returns it as a
   // 56-character string.
-  std::string hash(const char* data) const{
-    SHA512 sha512;
-    std::string hash_digest = sha512.hash(data, CONST_SHA512_224_H);
+  std::string hash(const char* data) const {
+    std::string hash_digest = __hash(data, CONST_SHA512_224_H);
     hash_digest.resize(56);
     return hash_digest;
   }
 };
 
-class SHA512_256 : public SHABase {
+class SHA512_256 : public SHA512 {
  public:
   // Computes a SHA-512/256 hash from input data.
   std::string hash(const char* data) const {
-    SHA512 sha512;
-    std::string hash_digest = sha512.hash(data, CONST_SHA512_256_H);
+    std::string hash_digest = __hash(data, CONST_SHA512_256_H);
     hash_digest.resize(64);
     return hash_digest;
   }
 };
+}  // namespace sha
 
-#endif
+#endif  // SHA_H_
