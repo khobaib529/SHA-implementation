@@ -47,6 +47,8 @@ The `SHA512` class implements the SHA-512 hashing function.
 **Public Methods:**
 - `std::string hash(const char* data)`: Computes the SHA-512 hash of the input data.
 
+**Disclaimer:** While the SHA-512 algorithm theoretically supports hashing up to 2<sup>128</sup> - 1 bits of data, this implementation is limited to handling up to 2<sup>64</sup> -1 bits of data.
+
 ### `SHA384`
 
 The `SHA384` class implements the SHA-384 hashing function.
@@ -77,7 +79,7 @@ To use the SHA hashing functions, include the header file in your C++ project an
 #include "sha.h"
 
 int main() {
-    SHA256 sha256;
+    sha::SHA256 sha256;
     std::string hash = sha256.hash("your data here");
     std::cout << "SHA-256 hash: " << hash << std::endl;
     return 0;
