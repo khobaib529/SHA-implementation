@@ -84,3 +84,29 @@ int main() {
     std::cout << "SHA-256 hash: " << hash << std::endl;
     return 0;
 }
+```
+
+## Benchmarking
+To benchmark the performance of the SHA implementations, use the provided benchmarking executable. It measures the time taken to compute hashes for different SHA algorithms.
+
+**1. Build the Benchmarking Executable:**
+```shell
+make benchmark
+```
+
+**2. Run the Benchmark:**
+```shell
+build/benchmark/sha_benchmark
+```
+
+## Testing
+To test the SHA implementations, use the provided test executable. It verifies the correctness of the hashing functions using predefined test cases.
+
+**1. Build the Test Executable:**
+```shell
+make test
+```
+**2. Run the Tests:**
+```shell
+build/test/test_sha
+```
