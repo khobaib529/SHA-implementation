@@ -118,7 +118,7 @@ class SHABase {
 
   // Converts a character array to an integral type representation.
   template <typename Type>
-  constexpr Type to_integral(const char* data) const {
+  Type to_integral(const char* data) const {
     Type value = 0;
     for (int i = 0; i < sizeof(Type); i++) {
       value |= (Type)(uint8_t)data[sizeof(Type) - 1 - i] << i * 8;
