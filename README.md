@@ -104,7 +104,7 @@ To test the SHA implementations, use the provided test executable. It verifies t
 
 **1. Build the Test Executable:**
 ```shell
-make test
+make unit_tests
 ```
 **2. Run the Tests:**
 ```shell
